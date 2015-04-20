@@ -1,0 +1,9 @@
+Scenario: User logs into game, buys tickets and waits when tickets purchased
+Meta:
+@flash111
+Given user0 joins a stream
+And there are no tickets bought and time to buy-in end for user0 is not less than '20' seconds
+When user0 selects '5' tickets and opens BuyIn panel
+Then '5' tickets selected in BuyIn panel
+When user0 clicks Buy Tickets button in BuyIn panel
+Then '5' tickets bought and correct amount debited user0 account

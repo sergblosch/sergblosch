@@ -1,0 +1,109 @@
+
+Scenario: User logs into game, buys tickets and waits when tickets purchased
+Meta:
+@flash
+Given user0 joins a stream
+And there are no tickets bought and time to buy-in end for user0 is not less than '20' seconds
+When user0 selects '5' tickets and opens BuyIn panel
+Then '5' tickets selected in BuyIn panel
+When user0 clicks Buy Tickets button in BuyIn panel
+Then '5' tickets bought and correct amount debited user0 account
+
+Scenario: 2 users log into game with limited number of participants and try to buy tickets on a round
+Meta:
+@dataset set2
+Given 'bingo75_maxPlayers1.xml' game settings deployed
+Given user0 and user1 join a stream
+And wait for next buy-in with buy-in time more than '30' seconds
+When user0 selects '5' tickets and buys them
+Then '5' tickets bought and correct amount debited user0 account
+When user1 selects '5' tickets and buys them
+Then user1 sees 'MAX_PLAYERS_REACHED_ERROR' message
+And '5' tickets not bought and user1 balance is not updated
+
+Scenario: 2 users log into game with limited number of sold tickets and try to buy tickets
+Meta:
+@dataset set3
+Given 'bingo75_maxSoldTickets10.xml' game settings deployed
+Given user0 and user1 join a stream
+And wait for next buy-in with buy-in time more than '30' seconds
+When user0 selects '5' tickets and buys them
+Then '5' tickets bought and correct amount debited user0 account
+When user1 selects '6' tickets and buys them
+Then user1 sees 'MAX_TICKETS_REACHED_ERROR' message
+And '6' tickets not bought and user1 balance is not updated
+When user1 deselects these '6' tickets
+And user1 selects '5' tickets and buys them
+Then '5' tickets bought and correct amount debited user1 account
+
+Scenario: User with insufficient funds logs into game and buys tickets
+Meta:
+@dataset set4
+Given 'player10' mock player configuration is added in admin console
+Given user0 joins a stream
+And there are no tickets bought and time to buy-in end for user0 is not less than '15' seconds
+When user0 selects '1' tickets and buys them
+Then user0 sees 'INSUFFICIENT_FUNDS_ERROR' message
+And '1' tickets not bought and user0 balance is not updated
+
+Scenario: User logs into game and buys tickets in the end of buy-in
+Given DirectpurchaseService updated with the purchase delay '10000'
+Given user0 joins a stream
+And wait for next buy-in with buy-in time more than '15' seconds
+When user0 selects '1' tickets and opens BuyIn panel
+And waits when '5' seconds left to the end of buy-in
+And user0 clicks Buy Tickets button in BuyIn panel
+Then '1' tickets bought and correct amount debited user0 account
+And presentation starts to play
+
+Scenario: User logs into game with custom base price, buys tickets and plays the game
+Meta:
+@flash
+Given 'bingo75_customBasePrice.xml' game settings deployed
+Given user0 joins a stream
+And wait for next buy-in with buy-in time more than '30' seconds
+Then ticket cost in Prize panel is equal to 'EUR2.50'
+When user0 selects '1' tickets and opens BuyIn panel
+Then ticket price in BuyIn panel is equal to 'EUR2.50'
+And total cost in BuyIn panel is equal to 'EUR2.50'
+
+When user0 clicks Buy Tickets button in BuyIn panel
+Then '1' tickets bought and correct amount debited user0 account
+And first prize value in Prize panel is equal to 'EUR0.34'
+And second prize value in Prize panel is equal to 'EUR0.34'
+And third prize value in Prize panel is equal to 'EUR0.34'
+And fourth prize value in Prize panel is equal to 'EUR0.34'
+And fifth prize value in Prize panel is equal to 'EUR0.90'
+
+When buy-in ends and presentation starts to play
+Then next prize value in Prize panel is equal to 'EUR0.34'
+When the current prize is won and win dialog is shown
+Then the prize value in win dialog is equal to 'EUR0.34'
+And winnings amount is updated in Status bar and it is equal to 'EUR0.34'
+
+When the win dialog is hidden
+Then next prize value in Prize panel is equal to 'EUR0.34'
+When the current prize is won and win dialog is shown
+Then the prize value in win dialog is equal to 'EUR0.34'
+And winnings amount is updated in Status bar and it is equal to 'EUR0.68'
+
+When the win dialog is hidden
+Then next prize value in Prize panel is equal to 'EUR0.34'
+When the current prize is won and win dialog is shown
+Then the prize value in win dialog is equal to 'EUR0.34'
+And winnings amount is updated in Status bar and it is equal to 'EUR1.02'
+
+When the win dialog is hidden
+Then next prize value in Prize panel is equal to 'EUR0.34'
+When the current prize is won and win dialog is shown
+Then the prize value in win dialog is equal to 'EUR0.34'
+And winnings amount is updated in Status bar and it is equal to 'EUR1.36'
+
+When the win dialog is hidden
+Then next prize value in Prize panel is equal to 'EUR0.90'
+When the current prize is won and win dialog is shown
+Then the prize value in win dialog is equal to 'EUR0.90'
+And winnings amount is updated in Status bar and it is equal to 'EUR2.26'
+
+When the win dialog is hidden
+Then user0 balance is updated with the winnings '2.26' EUR
