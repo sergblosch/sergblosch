@@ -1,8 +1,9 @@
 /**
  * Created by bsg on 20.04.2015.
  */
-    package com.example.tests;
-    import org.junit.*;
+    import org.junit.After;
+    import org.junit.Before;
+    import org.junit.Test;
 
     import java.util.concurrent.TimeUnit;
     import org.openqa.selenium.*;
@@ -25,6 +26,7 @@ public class TestCase {
 
         @Test
         public void testUntitled() throws Exception {
+            driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
             driver.get(baseUrl + "/login?email=sdg@mail.ru&fail=1&captcha=1");
             driver.findElement(By.name("Password")).clear();
             driver.findElement(By.name("Password")).sendKeys("sdfgds");
